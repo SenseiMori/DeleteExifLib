@@ -1,0 +1,116 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Security.Principal;
+using System.Text;
+using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace ExifRemoveConsole
+{
+    class JPGFile
+    {
+        public List<byte> cleanImageData;
+        public async Task<byte[]> FindMarkers(string file)
+        {
+            HashSet<byte> markers = new HashSet<byte>()
+            {
+              //0xD8,
+                0xE1,
+                0xE2,
+                0xE3,
+                0xE4,
+                0xE3,
+                0xE4,
+                0xE5,
+                0xE6,
+                0xE7,
+                0xE8,
+                0xE9,
+                0xEA,
+                0xEB,
+                0xEC,
+                0xED,
+                0xEE,
+                0xEF,
+                0xFE,
+              //0xD9
+            };
+
+            cleanImageData = new List<byte>();
+
+            await using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+            {
+                using (var binaryReader = new BinaryReader(fs))
+                {
+                    byte[] buffer = new byte[2];
+                    while (binaryReader.BaseStream.Position != binaryReader.BaseStream.Length)
+                    {
+                        int read = binaryReader.Read(buffer, 0, buffer.Length);
+                        if (buffer[0] == 0xFF && markers.Contains((byte)buffer[1]))
+                        {
+                            int appLength = binaryReader.ReadUInt16();
+                            int reversBytes = ShiftBytes(appLength);
+                            binaryReader.BaseStream.Seek(reversBytes - 2, SeekOrigin.Current);
+                        }
+                        else if (read == 1)
+                        {
+                            cleanImageData.Add(buffer[0]);
+                        }
+                        else
+                        {
+                            cleanImageData.Add(buffer[0]);
+                            cleanImageData.Add(buffer[1]);
+                        }
+
+
+
+                    }
+                }
+                return cleanImageData.ToArray();
+            }
+        }
+
+        public async Task WriteByteToFile(byte[] data, string outputFile)
+        {
+            await using (FileStream writer = new FileStream(outputFile, FileMode.Open, FileAccess.Write, FileShare.Write))
+            {
+                using (BinaryWriter binaryWriter = new BinaryWriter(writer))
+                {
+                    binaryWriter.BaseStream.Write(data);
+                }
+            }
+        }
+
+        public ushort ShiftBytes(int value)
+        {
+            byte secondByte = (byte)(value & 0xFF); // в переменную записываются последние 8 бит 1110_0001 то есть A1
+            int firstByte = value >> 8; // в переменную записываются первые 8 бит 1110_1010 то есть EA
+            int result = ((secondByte << 8) | firstByte);
+            return (ushort)result;
+        }
+
+        public async Task CreateZip(string[] inputFiles, string newZipName, string resultDirectory)
+        {
+            {
+                string zipPath = Path.Combine(resultDirectory, newZipName);
+                using var outStream = new FileStream(zipPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, 4096, true);
+                using var archive = new ZipArchive(outStream, ZipArchiveMode.Create, true);
+                foreach (string fileName in inputFiles)
+                {
+                    using (var inputStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+                    {
+                        ZipArchiveEntry fileEntry = archive.CreateEntry(Path.GetFileName(fileName));
+                        using var entryStream = fileEntry.Open();
+                        await inputStream.CopyToAsync(entryStream);
+
+                    }
+                }
+            }
+        }
+    }
+}
