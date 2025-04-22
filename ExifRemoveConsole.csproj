@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="gitignore" />
+    <None Remove=".gitignore" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="gitignore" />
+    <Compile Include=".gitignore" />
   </ItemGroup>
 
 </Project>
