@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ExifDeleteLib;
 
-namespace ExifRemoveConsole
+
+namespace ExifDeleteLib
 {
      class JPGDirectory
     {
