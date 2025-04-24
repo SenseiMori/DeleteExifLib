@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ExifDeleteLib;
 
 namespace ExifRemoveConsole
 {
@@ -13,21 +15,21 @@ namespace ExifRemoveConsole
             string[] images =  Directory.GetFiles(folder, "*.jpg");
             return images;
         }
-        public async Task <string> CreateFileInNewDirectory(string PathToOriginJpgFile)
+        public string CreateFileInNewDirectory(string PathToOriginJpgFile)
         {
                 string dir = Path.GetDirectoryName(PathToOriginJpgFile);
                 string newFolder = Path.Combine(dir, "ClearImages");
-            Directory.CreateDirectory(newFolder);
+                Directory.CreateDirectory(newFolder);
                 string outFileName = Path.GetFileName(PathToOriginJpgFile);
                 string outputFilePath = Path.Combine(newFolder, outFileName);
-                await using (var outStream = new StreamWriter(File.Create(outputFilePath))) ;
+                using (var outStream = new StreamWriter(File.Create(outputFilePath)))
                 return outputFilePath;
         }
         public string WriteDataToNewFile (byte[] data, string pathToNewFile)
         {
             using (var fileStream = new FileStream(pathToNewFile, FileMode.Create, FileAccess.Write, FileShare.Write))
             {
-                fileStream.Write(data);
+                fileStream.Write(data, 0, 2);
             }
             return pathToNewFile;
         }

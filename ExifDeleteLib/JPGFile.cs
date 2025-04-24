@@ -8,14 +8,14 @@ using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using ExifDeleteLib;
 
 namespace ExifRemoveConsole
 {
     class JPGFile
     {
         public List<byte> cleanImageData;
-        public async Task<byte[]> FindMarkers(string file)
+        public byte[] FindMarkers(string file)
         {
             HashSet<byte> markers = new HashSet<byte>()
             {
@@ -43,7 +43,7 @@ namespace ExifRemoveConsole
 
             cleanImageData = new List<byte>();
 
-            await using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+             using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
             {
                 using (var binaryReader = new BinaryReader(fs))
                 {
@@ -75,17 +75,6 @@ namespace ExifRemoveConsole
             }
         }
 
-        public async Task WriteByteToFile(byte[] data, string outputFile)
-        {
-            await using (FileStream writer = new FileStream(outputFile, FileMode.Open, FileAccess.Write, FileShare.Write))
-            {
-                using (BinaryWriter binaryWriter = new BinaryWriter(writer))
-                {
-                    binaryWriter.BaseStream.Write(data);
-                }
-            }
-        }
-
         public ushort ShiftBytes(int value)
         {
             byte secondByte = (byte)(value & 0xFF); // в переменную записываются последние 8 бит 1110_0001 то есть A1
@@ -94,7 +83,7 @@ namespace ExifRemoveConsole
             return (ushort)result;
         }
 
-        public async Task CreateZip(string[] inputFiles, string newZipName, string resultDirectory)
+        public void CreateZip(string[] inputFiles, string newZipName, string resultDirectory)
         {
             {
                 string zipPath = Path.Combine(resultDirectory, newZipName);
@@ -106,7 +95,7 @@ namespace ExifRemoveConsole
                     {
                         ZipArchiveEntry fileEntry = archive.CreateEntry(Path.GetFileName(fileName));
                         using var entryStream = fileEntry.Open();
-                        await inputStream.CopyToAsync(entryStream);
+                        inputStream.CopyTo(entryStream);
 
                     }
                 }
