@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ExifDeleteLib
 {
-    class JPGFile
+    public class JPGFile
     {
         public List<byte> cleanImageData;
         public byte[] FindMarkers(string file)

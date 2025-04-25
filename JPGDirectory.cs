@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ExifDeleteLib
 {
-     class JPGDirectory
+     public class JPGDirectory
     {
         public string[] GetImagesFromFolder(string folder)
         {
