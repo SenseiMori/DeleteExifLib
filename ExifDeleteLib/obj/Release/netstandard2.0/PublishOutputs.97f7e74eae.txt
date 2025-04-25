@@ -1,0 +1,3 @@
+C:\Users\1311971\source\repos\DeleteExifAPI\ExifDeleteLib\bin\Release\netstandard2.0\publish\ExifDeleteLib.dll
+C:\Users\1311971\source\repos\DeleteExifAPI\ExifDeleteLib\bin\Release\netstandard2.0\publish\ExifDeleteLib.deps.json
+C:\Users\1311971\source\repos\DeleteExifAPI\ExifDeleteLib\bin\Release\netstandard2.0\publish\ExifDeleteLib.pdb
