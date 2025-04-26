@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,11 +18,12 @@ namespace ExifDeleteLib
         }
         public string CreateFileInNewDirectory(string OriginFile, string newDirectory)
         {
-               
+
                 string outFileName = Path.GetFileName(OriginFile);
                 string outputFilePath = Path.Combine(newDirectory, outFileName);
-                using (var outStream = new StreamWriter(File.Create(outputFilePath)))
-                return outputFilePath;
+                File.Copy(OriginFile, outputFilePath, true);
+                return outputFilePath; 
+
         }
 
         public string CreateDirectory (string originDirectory)
@@ -33,8 +35,6 @@ namespace ExifDeleteLib
                 Directory.CreateDirectory(newDirectory);
             }
             return newDirectory;
-
         }
-       
     }
 }
