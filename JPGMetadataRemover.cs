@@ -19,7 +19,6 @@ namespace ExifDeleteLib
         public void RemoveExifForImage(string [] files)
         {
             List <string> newImages = new List<string>();
-            Stopwatch sw = Stopwatch.StartNew();
             foreach (string image in files)
             {
                 byte[] clearData = JPGFile.FindMarkers(image);
