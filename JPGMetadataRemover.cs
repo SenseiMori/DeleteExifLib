@@ -16,8 +16,8 @@ namespace ExifDeleteLib
             {
                 byte[] clearData = JPGFile.FindMarkers(image);
                 string clearImagesDirectory = JPGDirectory.CreateDirectory(image);
-                string clearImage = JPGDirectory.CreateFileInNewDirectory(clearImagesDirectory);
-                JPGDirectory.WriteDataToNewFile(clearData, clearImage);
+                string clearImage = JPGDirectory.CreateFileInNewDirectory(image, clearImagesDirectory);
+                JPGFile.WriteDataToNewFile(clearData, clearImage);
             }
         }
     }

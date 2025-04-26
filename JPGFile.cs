@@ -65,15 +65,11 @@ namespace ExifDeleteLib
                             cleanImageData.Add(buffer[0]);
                             cleanImageData.Add(buffer[1]);
                         }
-
-
-
                     }
                 }
                 return cleanImageData.ToArray();
             }
         }
-
         public ushort ShiftBytes(int value)
         {
             byte secondByte = (byte)(value & 0xFF); // в переменную записываются последние 8 бит 1110_0001 то есть A1
@@ -81,7 +77,14 @@ namespace ExifDeleteLib
             int result = ((secondByte << 8) | firstByte);
             return (ushort)result;
         }
-
+        public string WriteDataToNewFile(byte[] data, string pathToNewFile)
+        {
+            using (var fileStream = new FileStream(pathToNewFile, FileMode.Create, FileAccess.Write, FileShare.Write))
+            {
+                fileStream.Write(data, 0, 2);
+            }
+            return pathToNewFile;
+        }
         public void CreateZip(string[] inputFiles, string newZipName, string resultDirectory)
         {
             {
@@ -95,7 +98,6 @@ namespace ExifDeleteLib
                         ZipArchiveEntry fileEntry = archive.CreateEntry(Path.GetFileName(fileName));
                         using var entryStream = fileEntry.Open();
                         inputStream.CopyTo(entryStream);
-
                     }
                 }
             }

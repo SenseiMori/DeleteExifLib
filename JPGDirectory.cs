@@ -15,23 +15,26 @@ namespace ExifDeleteLib
             string[] images =  Directory.GetFiles(folder, "*.jpg");
             return images;
         }
-        public string CreateFileInNewDirectory(string PathToOriginJpgFile)
+        public string CreateFileInNewDirectory(string OriginFile, string newDirectory)
         {
-                string dir = Path.GetDirectoryName(PathToOriginJpgFile);
-                string newFolder = Path.Combine(dir, "ClearImages");
-                Directory.CreateDirectory(newFolder);
-                string outFileName = Path.GetFileName(PathToOriginJpgFile);
-                string outputFilePath = Path.Combine(newFolder, outFileName);
+               
+                string outFileName = Path.GetFileName(OriginFile);
+                string outputFilePath = Path.Combine(newDirectory, outFileName);
                 using (var outStream = new StreamWriter(File.Create(outputFilePath)))
                 return outputFilePath;
         }
-        public string WriteDataToNewFile (byte[] data, string pathToNewFile)
+
+        public string CreateDirectory (string originDirectory)
         {
-            using (var fileStream = new FileStream(pathToNewFile, FileMode.Create, FileAccess.Write, FileShare.Write))
+            string dir = Path.GetDirectoryName(originDirectory);
+            string newDirectory = Path.Combine(dir, "ClearImages");
+            if (!Directory.Exists(newDirectory))
             {
-                fileStream.Write(data, 0, 2);
+                Directory.CreateDirectory(newDirectory);
             }
-            return pathToNewFile;
+            return newDirectory;
+
         }
+       
     }
 }
