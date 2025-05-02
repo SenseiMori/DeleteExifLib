@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExifDeleteLib
+namespace ExifDeleteLib.Core
 {
-    public enum JPGMarkers: byte
+    public enum JPGMarkers : byte
     {
 
         SOI = 0xD8,
@@ -26,6 +26,6 @@ namespace ExifDeleteLib
         APP14 = 0xEE,
         APP15 = 0xEF,
         COM = 0xFE,
-        EOI =0xD9
+        EOI = 0xD9
     }
 }
