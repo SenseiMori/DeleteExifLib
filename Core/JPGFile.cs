@@ -1,55 +1,28 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.IO;
 
-namespace ExifDeleteLib.Core
+namespace ExifDeleteLib.Core.JPG
 {
+
     public class JPGFile
     {
-        //public List<byte> cleanImageData;
-        public byte[] FindMarkers(string file)
-        {
-            HashSet<byte> markers = new HashSet<byte>()
-            {
-              //0xD8,
-                0xE1,
-                0xE2,
-                0xE3,
-                0xE4,
-                0xE3,
-                0xE4,
-                0xE5,
-                0xE6,
-                0xE7,
-                0xE8,
-                0xE9,
-                0xEA,
-                0xEB,
-                0xEC,
-                0xED,
-                0xEE,
-                0xEF,
-                0xFE,
-              //0xD9
-            };
-            List <byte> cleanImageData = new List<byte>();
+        private readonly HashSet<byte> _markers = new JPGMarkers().markers;
 
-            using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+        public async Task<byte[]> GetJPGWithoutAppSegments(string file)
+        {
+            JPGMarkers jPGMarkers = new JPGMarkers();
+
+            List<byte> cleanImageData = new List<byte>();
+            using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true))
             {
-                using (var binaryReader = new BinaryReader(fs))
+                using (BinaryReader binaryReader = new BinaryReader(fs))
                 {
                     byte[] buffer = new byte[2];
                     while (binaryReader.BaseStream.Position != binaryReader.BaseStream.Length)
                     {
-                        int read = binaryReader.Read(buffer, 0, buffer.Length);
-                        if (buffer[0] == 0xFF && markers.Contains(buffer[1]))
+                        int read = await binaryReader.BaseStream.ReadAsync(buffer);
+                        if (buffer[0] == 0xFF && _markers.Contains(buffer[1]))
                         {
                             int appLength = binaryReader.ReadUInt16();
                             int reversBytes = ShiftBytes(appLength);
@@ -69,6 +42,30 @@ namespace ExifDeleteLib.Core
                 return cleanImageData.ToArray();
             }
         }
+        public async Task<List<byte>> GetMarkersAppSegment(string file)
+        {
+            List<byte> markers = new List<byte>();
+            JPGMarkers jPGMarkers = new JPGMarkers();
+            using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true))
+            {
+                using (var binaryReader = new BinaryReader(fs))
+                {
+                    byte[] buffer = new byte[2];
+                    while (binaryReader.BaseStream.Position != binaryReader.BaseStream.Length)
+                    {
+                        int read = await binaryReader.BaseStream.ReadAsync(buffer);
+                        if (buffer[0] == 0xFF && _markers.Contains(buffer[1]))
+                        {
+                            int appLength = binaryReader.ReadUInt16();
+                            int reversBytes = ShiftBytes(appLength);
+                            markers.Add(buffer[1]);
+                        }
+                    }
+                    return markers;
+                }
+            }
+        }
+
         public ushort ShiftBytes(int value)
         {
             byte secondByte = (byte)(value & 0xFF); // в переменную записываются последние 8 бит 1110_0001 то есть A1
@@ -76,13 +73,33 @@ namespace ExifDeleteLib.Core
             int result = secondByte << 8 | firstByte;
             return (ushort)result;
         }
-        public string WriteClearDataToNewFile(byte[] data, string pathToNewFile)
-        {
-            using (var fileStream = new FileStream(pathToNewFile, FileMode.Create, FileAccess.Write, FileShare.Write))
-            {
-                fileStream.Write(data, 0, data.Length);
-            }
-            return pathToNewFile;
-        }
+
     }
+    public class JPGMetadataReader
+    {
+        JPGFile JPGFile { get; set; }
+
+        public JPGMetadataReader()
+        {
+            JPGFile = new JPGFile();
+        }
+
+        public async Task<byte[]> DeleteExifMarkers(string pathToFile) => await JPGFile.GetJPGWithoutAppSegments(pathToFile);
+
+        #region Find Markers
+        public async Task<List<byte>> ReadExifFromImage(string file)
+        {
+            List<byte> markersList = new List<byte>();
+            List<byte> data = new List<byte>();
+            data = await JPGFile.GetMarkersAppSegment(file);
+
+            foreach (byte marker in data)
+            {
+                markersList.Add(marker);
+            }
+            return markersList;
+        }
+        #endregion
+    }
+
 }

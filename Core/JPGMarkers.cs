@@ -6,26 +6,30 @@ using System.Threading.Tasks;
 
 namespace ExifDeleteLib.Core
 {
-    public enum JPGMarkers : byte
-    {
-
-        SOI = 0xD8,
-        APP1 = 0xE1,
-        APP2 = 0xE2,
-        APP3 = 0xE3,
-        APP4 = 0xE4,
-        APP5 = 0xE5,
-        APP6 = 0xE6,
-        APP7 = 0xE7,
-        APP8 = 0xE8,
-        APP9 = 0xE9,
-        APP10 = 0xEA,
-        APP11 = 0xEB,
-        APP12 = 0xEC,
-        APP13 = 0xED,
-        APP14 = 0xEE,
-        APP15 = 0xEF,
-        COM = 0xFE,
-        EOI = 0xD9
+    public class JPGMarkers 
+    { 
+            public HashSet<byte> markers = new HashSet<byte>()
+            {
+              //0xD8,
+                0xE1,
+                0xE2,
+                0xE3,
+                0xE4,
+                0xE3,
+                0xE4,
+                0xE5,
+                0xE6,
+                0xE7,
+                0xE8,
+                0xE9,
+                0xEA,
+                0xEB,
+                0xEC,
+                0xED,
+                0xEE,
+                0xEF,
+                0xFE,
+              //0xD9
+            };
     }
 }
