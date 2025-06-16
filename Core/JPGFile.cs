@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.IO;
+using System.Threading.Tasks;
 
-namespace ExifDeleteLib.Core.JPG
+namespace EXIFRemover.Core
 {
-
     public class JPGFile
     {
         private readonly HashSet<byte> _markers = new JPGMarkers().markers;
@@ -21,7 +20,7 @@ namespace ExifDeleteLib.Core.JPG
                     byte[] buffer = new byte[2];
                     while (binaryReader.BaseStream.Position != binaryReader.BaseStream.Length)
                     {
-                        int read = await binaryReader.BaseStream.ReadAsync(buffer);
+                        int read = await binaryReader.BaseStream.ReadAsync(buffer, 0, buffer.Length);
                         if (buffer[0] == 0xFF && _markers.Contains(buffer[1]))
                         {
                             int appLength = binaryReader.ReadUInt16();
@@ -53,7 +52,7 @@ namespace ExifDeleteLib.Core.JPG
                     byte[] buffer = new byte[2];
                     while (binaryReader.BaseStream.Position != binaryReader.BaseStream.Length)
                     {
-                        int read = await binaryReader.BaseStream.ReadAsync(buffer);
+                        int read = await binaryReader.BaseStream.ReadAsync(buffer, 0, buffer.Length);
                         if (buffer[0] == 0xFF && _markers.Contains(buffer[1]))
                         {
                             int appLength = binaryReader.ReadUInt16();
@@ -68,8 +67,8 @@ namespace ExifDeleteLib.Core.JPG
 
         public ushort ShiftBytes(int value)
         {
-            byte secondByte = (byte)(value & 0xFF); // в переменную записываются последние 8 бит 1110_0001 то есть A1
-            int firstByte = value >> 8; // в переменную записываются первые 8 бит 1110_1010 то есть EA
+            byte secondByte = (byte)(value & 0xFF); 
+            int firstByte = value >> 8; 
             int result = secondByte << 8 | firstByte;
             return (ushort)result;
         }
